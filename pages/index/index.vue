@@ -457,32 +457,56 @@
 			};
 		},
 		onLoad() {
+      const _this = this;
+      uni.getStorage({
+        key: 'bookList',
+        success: function (res) {
+          //从缓存读取
+          if (res.data){
+            _this.bookList = res.data
+          }
+        },
+        fail: function (err) {
+          _this.getBookList()
+        }
+      });
 			// uni.showLoading({
 			// 	title: '加载中...',
 			// 	mask: true
 			// });
 		},
 		onReady() {
-			let bookList = []
-			let count = 0
-			for (let j = 0; j < this.list.length; j++){
-				bookList.push([])
-			}
-			this.list.forEach((item, index) => {
-				for (let i = 0; i < item.total; i++) {
-					count = count + 1
-					bookList[index][i] =
-							{
-								name: item.name,
-								chapter: `第${i + 1}章`,
-								number: String(count).padStart(4, '0')
-							}
-				}
-			})
-			this.bookList = bookList
-			// uni.hideLoading()
+
 		},
 		methods: {
+      getBookList(){
+        const _this = this;
+        let bookList = []
+        let count = 0
+        for (let j = 0; j < this.list.length; j++){
+          bookList.push([])
+        }
+        this.list.forEach((item, index) => {
+          for (let i = 0; i < item.total; i++) {
+            count = count + 1
+            bookList[index][i] =
+                {
+                  name: item.name,
+                  chapter: `第${i + 1}章`,
+                  number: String(count).padStart(4, '0')
+                }
+          }
+        })
+        this.bookList = bookList
+        uni.setStorage({
+          key: 'bookList',
+          data: _this.bookList,
+          success: function () {
+            console.log('缓存成功！');
+          }
+        });
+        // uni.hideLoading()
+      },
       xTabSelect(e) {
         this.xTabCur = e.currentTarget.dataset.id
         if (this.xTabCur === 0) {
@@ -495,7 +519,6 @@
           this.verticalNavTop = (39 - 1) * 50
         }
       },
-
 			TabSelect(e) {
 				this.tabCur = e.currentTarget.dataset.id;
 				this.mainCur = e.currentTarget.dataset.id;
